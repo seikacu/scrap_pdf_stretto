@@ -12,21 +12,14 @@ options = webdriver.FirefoxOptions()
 def set_driver_options(options:webdriver.FirefoxOptions):
     # user-agent
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 YaBrowser/23.5.2.625 Yowser/2.5 Safari/537.36")
-
-    # for ChromeDriver version 79.0.3945.16 or over
-    # options.add_argument("--disable-blink-features=AutomationControlled")
-
-    # options.add_argument('--ignore-certificate-errors')
-    # options.add_argument('--ignore-ssl-errors')
-
+    options.set_preference("dom.webdriver.enabled", False)
 
 set_driver_options(options)
 
-# caps = DesiredCapabilities().CHROME
-# caps['pageLoadStrategy'] = 'eager'
+caps = DesiredCapabilities().FIREFOX
+caps["pageLoadStrategy"] = "normal"
 
-# desired_capabilities=caps,
-service = Service(executable_path=r"C:\WebDriver\geckodriver\geckodriver.exe") # desired_capabilities=caps,
+service = Service(executable_path=r"C:\WebDriver\geckodriver\geckodriver")
 driver = webdriver.Firefox(service=service, options=options)
 
 headers = {
@@ -46,7 +39,7 @@ def click_next(driver:webdriver.Firefox):
     el_plus = driver.find_element(By.XPATH, f"//a[contains(@class, 'paginate_button next')]")
     el_plus.click()
 
-def get_pdf(driver:webdriver.Firefox, el_download):
+def get_pdf(el_download):
     try:
         url_link = el_download.get_attribute('href')
         if len(url_link) > 0:
@@ -65,8 +58,10 @@ def get_pdf(driver:webdriver.Firefox, el_download):
         pass
 
 try:
+    with open(f"log.txt", "w") as file:
+        file.write("")
     driver.get("https://cases.stretto.com/TuesdayMorning/claims/")
-    time.sleep(5)
+    time.sleep(1)
     click_ok(driver)
     for i in range(1, 188):
         print(f"i = {i}")
@@ -78,14 +73,20 @@ try:
             els_plus[j].click()
             print(f"i = {i}, j = {j}")
             time.sleep(1)
-            
+        
         time.sleep(1)
         els_downloads = driver.find_elements(By.CSS_SELECTOR, '.creditor-detail-box a')
         size_download = els_downloads.__len__()
         for z in range(0, size_download):
             print(f"z = {z} of {size_download}")
-            get_pdf(driver, els_downloads[z])
+            get_pdf(els_downloads[z])
         time.sleep(1)
+        with open("log.txt", "a") as file:
+            file.write(f"Page {i} contains {size_download} files\n")
+
         click_next(driver)
 except Exception as ex:
     print(ex)
+finally:
+    driver.close()
+    driver.quit()

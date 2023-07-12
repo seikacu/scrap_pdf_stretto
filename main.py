@@ -19,7 +19,7 @@ def set_driver_options(options:webdriver.ChromeOptions):
     options.add_argument('--ignore-certificate-errors')
     options.add_argument('--ignore-ssl-errors')
     
-    options.debugger_address = 'localhost:8989'
+    # options.debugger_address = 'localhost:8989'
 
 
 set_driver_options(options)
